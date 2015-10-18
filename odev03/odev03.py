@@ -1,36 +1,51 @@
-import Queue
+
 import threading
-import time
 
 s, n, l = 1, 6, 10
-exitFlag = False;
+k, m = 0, 1
+newtextline = []
+textoneline = []
+lenline = []
+
 
 class MyThread (threading.Thread):
-    def __init__(self, threadID, name, q):
+    def __init__(self, threadID):
         threading.Thread.__init__(self)
         self.threadID = threadID
-        self.name = name
-        self.q = q
 
     def run(self):
         process_data()
 
 def process_data():
+    exitFlag = False
     while not exitFlag:
         lock_key.acquire()
-        if not workQueue.empty():
-            data = q.get()
-            queueLock.release()
-            print "%s processing %s" % (threadName, data)
+        k = (k + 1) % 6
+        lock_key.release()
+        textoneline[k] = rfl.readline()
+        lenline[k] = len(textoneline[k])
+        textoneline[k].upper()
+        if lenline[k] is not 0:
+            for i in range(0, lenline[k]):
+                for j in range(0, 26):
+                    if textoneline[i] is alphabet[j]:
+                        newtextline[k][i] = alphabet[(j + s) % 26]
+                        break
         else:
-            queueLock.release()
-        time.sleep(1)
+            exitFlag = True
 
-alphabet  = "abcdefghijklmnopqrstuvwxyz"
+        while k is not m:
+            pass
+
+        wfl.write(newtextline[k])
+        m = m + 1
+
+alphabet  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 lock_key = threading.Lock()
 threads = []
 
-fl = open("metin.txt", "r")
+rfl = open("metin.txt", "r")
+wfl = open("crypted_" + repr(s) + "_" + repr(n) + "_" + repr(l) + ".txt", 'w')
 
 # Create new threads
 for tID in range(0, n):
@@ -38,20 +53,9 @@ for tID in range(0, n):
     thread.start()
     threads.append(thread)
 
-# Fill the queue
-queueLock.acquire()
-for word in nameList:
-    workQueue.put(word)
-queueLock.release()
-
-# Wait for queue to empty
-while not workQueue.empty():
-    pass
-
-# Notify threads it's time to exit
-exitFlag = 1
-
 # Wait for all threads to complete
 for t in threads:
     t.join()
-print "Exiting Main Thread"
+
+rfl.close()
+wfl.close()
