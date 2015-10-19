@@ -1,56 +1,46 @@
+
 import threading
 
 s, n, l = 1, 6, 10
-order, k = 0, 1
-class MyThread (threading.Thread):
+k, m = 0, 1
+newtextline = []
+textoneline = []
+lenline = []
 
+
+class MyThread (threading.Thread):
     def __init__(self, threadID):
         threading.Thread.__init__(self)
         self.threadID = threadID
 
     def run(self):
-        getline()
+        process_data()
 
-def getline():
-    global order
-    print thread.threadID
-    workfinish = False
-    while workfinish is False:
-        newtextline = ""
+def process_data():
+    exitFlag = False
+    while not exitFlag:
         lock_key.acquire()
-        textoneline = rfl.readline()
-        thread.threadID = order
-        order+=1
+        k = (k + 1) % 6
         lock_key.release()
-        lenline = len(textoneline)
-        bigtextline = textoneline.upper()
-        if lenline is not 0:
-            for i in bigtextline:
+        textoneline[k] = rfl.readline()
+        lenline[k] = len(textoneline[k])
+        textoneline[k].upper()
+        if lenline[k] is not 0:
+            for i in range(0, lenline[k]):
                 for j in range(0, 26):
-                    if i is alphabet[j]:
-                        newtextline += alphabet[(j + s) % 26]
-                    elif i in [',', '.', ' ', '(', ')', '-', '"', '*', ':', "\n"] or i in '0123456789':
-                        newtextline += i
+                    if textoneline[i] is alphabet[j]:
+                        newtextline[k][i] = alphabet[(j + s) % 26]
                         break
-            newwrite(newtextline,order)
         else:
-            workfinish = True
+            exitFlag = True
 
-def newwrite(textline,o):
-    key = False
-    global k
-    if k == o:
-        wfl.write(textline)
-        k+=1
-        if key:
-            lock_key.release()
-            key = False
-    else:
-        lock_key.acquire()
-        key = True
-        newwrite(textline,o)
+        while k is not m:
+            pass
 
-alphabet  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "\n"
+        wfl.write(newtextline[k])
+        m = m + 1
+
+alphabet  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 lock_key = threading.Lock()
 threads = []
 
