@@ -1,59 +1,58 @@
 import threading
+import Queue
 
 class MyThread (threading.Thread):
     def __init__(self, threadID):
         threading.Thread.__init__(self)
-        self.threadID = threadID
+        with lock_key1:
+                    self.threadID = threadID
 
     def run(self):
         getline()
+        lock_key1.acquire()
+        print thread.threadID
+        lock_key1.release()
 
 def getline():
-    global orderkey
-    lock_key.acquire()
+    lock_key1.acquire()
     textoneline = rfl.readline()
-    print orderkey
-    orderkey+=1
+    threadqueue.put(thread.threadID)
+    encode(thread.threadID,textoneline,len(textoneline))
+    lock_key1.release()
 
-    encode(textoneline,orderkey-1)
-    lock_key.release()
-def encode(line, order):
+def encode(Id, line, lenght):
     newline = ""
-    if len(line) is not 0:
-        bigline = line.upper()
-        for i in bigline:
-            if i in "0123456789.,'^+%&/()=?_-*\";:><|\}][{$#\n\t ":
-                newline += i
-                continue
-            for j in alphabet:
-                if i is j:
-                    newline += alphabet[alphabet.index(j)]
-                    break
-        putline(newline,order)
+    bigline = line.upper()
+    for i in bigline:
+        if i in "0123456789.,'^+%&/()=?_-*\";:><|\}][{$#\n\t ":
+            newline += i
+            continue
+        for j in alphabet:
+            if i is j:
+                newline += alphabet[alphabet.index(j)]
+                break
+    putline(Id, newline,lenght)
+
+def putline(id, codeline, lenght):
+    dizi.append(threadqueue.get())
+    lock_key2.acquire()
+    if  id is dizi[0]:
+        wfl.write(codeline)
+        del dizi[0]
+    else:
+        putline(id, codeline, lenght)
+    if lenght > 0:
+        thread.threadID += 6
         getline()
 
-def putline(codeline,order):
-    global orderline
-    lock_key.acquire()
-    workfinished = False
-    if order >= len(orderline):
-        for i in (len(orderline), order):
-            orderline.append(codeline)
-        print orderline
-    else:
-        del orderline[order]
-        orderline.insert(order, codeline)
-        print orderline
-    lock_key.release()
-    workfinished = True
+    lock_key2.release()
 
 s, n = 1, 6
 alphabet  = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-lock_key = threading.Lock()
+threadqueue = Queue.Queue()
+lock_key1, lock_key2 = threading.Lock(), threading.Lock()
 threads = []
-orderkey = 0
-orderline = []
-workfinished = False
+dizi = []
 
 rfl = open("metin.txt", "r")
 wfl = open("crypted_" + repr(s) + "_" + repr(n) + "_" + "line" + ".txt", 'w')
@@ -62,15 +61,14 @@ wfl = open("crypted_" + repr(s) + "_" + repr(n) + "_" + "line" + ".txt", 'w')
 for tID in range(0, n):
     thread = MyThread(tID)
     thread.start()
-    threads = []
     threads.append(thread)
+
 
 
 # Wait for all threads to complete
 for t in threads:
     t.join()
 
-for i in orderline:
-    wfl.write(i)
 
 wfl.close()
+rfl.close()
