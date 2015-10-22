@@ -65,7 +65,6 @@ for tID in range(0, n):
     thread.start()
     threads.append(thread)
 
-
 # Wait for all threads to complete
 for t in threads:
     t.join()
