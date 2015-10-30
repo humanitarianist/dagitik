@@ -3,7 +3,7 @@
 import socket
 import threading
 import datetime
-
+import random
 
 class myThread (threading.Thread):
 
@@ -22,12 +22,12 @@ class myThread (threading.Thread):
 def ConnectClient(self):
     self.clientSocket.send("Merhaba, saat su an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
     while True:
-        a = self.clientSocket.recv(1024)
-        b = "end"
-        if(a != b):
+        fromClient = self.clientSocket.recv(1024)
+        lastInst = "end"
+        if(fromClient != lastInst):
             self.clientSocket.send("Peki " + repr(self.clientAddr[1]))
         else:
-            self.clientSocket.send(b)
+            self.clientSocket.send(lastInst)
             break
 
 key = threading.Lock()

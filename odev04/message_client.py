@@ -10,12 +10,12 @@ class readThread (threading.Thread):
 
     def run(self):
         while True:
-            a = self.clientSocket.recv(1024)
-            b = "end"
-            if(a == b):
+            fromServer = self.clientSocket.recv(1024)
+            lastinst = "end"
+            if(fromServer == lastinst):
                 break
             else:
-                print a
+                print fromServer
 
 
 class writeThread (threading.Thread):
@@ -26,10 +26,10 @@ class writeThread (threading.Thread):
 
     def run(self):
         while True:
-            a = raw_input()
-            b = "end"
-            self.clientSocket.send(a)
-            if a == b:
+            fromClient = raw_input()
+            lastInst = "end"
+            self.clientSocket.send(fromClient)
+            if fromClient == lastInst:
                 break
 
 clientSocket = socket.socket()
