@@ -28,7 +28,6 @@ def ConnectClient(self):
         time += 1
         if time%time == 0:
             print self.clientSocket.send("Merhaba, saat þu an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
-        self.clientSocket.send(repr(time))
         fromClient = self.clientSocket.recv(1024)
         lastInst = "end"
         if(fromClient != lastInst):
