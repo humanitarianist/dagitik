@@ -24,12 +24,12 @@ class myThread (threading.Thread):
 def ConnectClient(self):
     time = int(round(20*random.random())) + 1
     threshold  = time
-    self.clientSocket.send("Merhaba, saat þu an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
+    self.clientSocket.send("Merhaba, saat su an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
     print
     while True:
         time += 1
         if time%threshold == 0:
-            self.clientSocket.send("Merhaba, saat þu an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
+            self.clientSocket.send("Merhaba, saat su an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
             time = int(round(20*random.random())) + 1
             threshold = time
         fromClient = self.clientSocket.recv(1024)
