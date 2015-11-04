@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- encoding: ISO8859-9 -*-
+# -*- encoding: ISO8859-10 -*-
 
 import socket
 import threading
@@ -23,11 +23,15 @@ class myThread (threading.Thread):
 
 def ConnectClient(self):
     time = int(round(20*random.random())) + 1
+    threshold  = time
     self.clientSocket.send("Merhaba, saat þu an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
+    print
     while True:
         time += 1
-        if time%time == 0:
-            print self.clientSocket.send("Merhaba, saat þu an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
+        if time%threshold == 0:
+            self.clientSocket.send("Merhaba, saat þu an %s" % datetime.datetime.now().strftime("%H:%M:%S"))
+            time = int(round(20*random.random())) + 1
+            threshold = time
         fromClient = self.clientSocket.recv(1024)
         lastInst = "end"
         if(fromClient != lastInst):
