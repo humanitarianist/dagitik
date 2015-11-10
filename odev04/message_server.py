@@ -40,29 +40,23 @@ def ConnectClient(self):
             self.clientSocket.send(lastInst)
             break
 
-def showTime():
-    time = int(round(20*random.random())) + 1
-
-key = threading.Lock()
-ServerSocket = socket.socket()
+serverSocket = socket.socket()
 host = socket.gethostname()
-port = 1234
-ServerSocket.bind((host, port))
+port = 12345
+serverSocket.bind((host, port))
 threadID = 0
-haveConnection = 0
 threads = []
-ServerSocket.listen(5)
+serverSocket.listen(5)
 
 while True:
     if threadID == 0:
         print "Waiting for connection"
-    clientSocket, addr = ServerSocket.accept()
+    clientSocket, addr = serverSocket.accept()
     print 'Got a connection from ', addr
     threadID += 1
     thread = myThread(threadID, clientSocket, addr)
     threads.append(thread)
     thread.start()
-    showTime()
 
 for i in threads:
     i.join()
