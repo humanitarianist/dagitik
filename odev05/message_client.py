@@ -4,15 +4,16 @@ import threading
 
 class readThread (threading.Thread):
 
-    def __init__(self, clientSocket):
+    def __init__(self, serverSocket):
         threading.Thread.__init__(self)
-        self.clientSocket = clientSocket
+        self.serverSocket = serverSocket
 
     def run(self):
         while True:
-            fromServer = self.clientSocket.recv(1024)
+            fromServer = self.serverSocket.recv(1024)
             lastinst = "BYE"
             if(lastinst in fromServer):
+                print fromServer
                 break
             else:
                 print fromServer
@@ -20,28 +21,28 @@ class readThread (threading.Thread):
 
 class writeThread (threading.Thread):
 
-    def __init__(self, clientSocket):
+    def __init__(self, serverSocket):
         threading.Thread.__init__(self)
-        self.clientSocket = clientSocket
+        self.serverSocket = serverSocket
 
     def run(self):
         while True:
             fromClient = raw_input()
             lastInst = "QUI"
-            self.clientSocket.send(fromClient)
-            if fromClient == lastInst:
+            self.serverSocket.send(fromClient)
+            if fromClient[0:3] == lastInst:
                 break
 
 
-clientSocket = socket.socket()
+serverSocket = socket.socket()
 
 host = socket.gethostname()
 port = 12346
 
-clientSocket.connect((host, port))
+serverSocket.connect((host, port))
 
-rThread = readThread(clientSocket)
-wThread = writeThread(clientSocket)
+rThread = readThread(serverSocket)
+wThread = writeThread(serverSocket)
 
 rThread.start()
 wThread.start()
