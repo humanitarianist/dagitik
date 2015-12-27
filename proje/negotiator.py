@@ -38,40 +38,51 @@ class serverReadThread(threading.Thread):
             ipNo = arguments[:indexRouter]
             portNo = data[indexRouter+1:]
 
-            lock4.acquire()
+            lock2.acquire()
             self.connectPoint = [ipNo, portNo, "W"]
-            lock4.release()
 
-            lock1.acquire()
-            self.serverQueue.put("REGWA\n")
-            lock1.release()
+            i = 0
+            registered = False
+            for point in self.connectPointList:
+                if point[i][0] == self.connectPoint[0] and point[i][1] == self.connectPoint[1]:
+                    lock1.acquire()
+                    self.serverQueue.put("REGOK " + time.time())
+                    lock1.release()
+                    registered = True
+                    self.connectPoint = []
+                i += 1
+
+            lock2.release()
+
+            if registered == False:
+                lock1.acquire()
+                self.serverQueue.put("REGWA\n")
+                lock1.release()
 
         elif command == "GETNL":
-            lock4.acquire()
+
             if self.connectPoint[2] != "S":
-                lock4.release()
                 lock1.acquire()
                 self.serverQueue.put("REGER\n")
                 lock1.release()
             else:
-                lock4.release()
                 lock1.acquire()
                 self.serverQueue.put("NLIST BEGIN\n")
 
                 if arguments == None:
-                    j = 0
+                    i = 0
                     lock3.acquire()
-                    for i in self.connectPointList:
-                        self.serverQueue.put(self.connectPointList[j][0] + ":" + self.connectPointList[j][1] + ":" + self.connectPointList[j][3] + ":P")
-                        j += 1
+                    for point in self.connectPointList:
+                        self.serverQueue.put(point[i][0] + ":" + point[i][1] + ":" + point[i][3] + ":P")
+                        i += 1
                     lock3.release()
                 else:
-                    j = 0
+                    i = 0
                     lock3.acquire()
-                    for i in self.connectPointList:
-                        if j < arguments:
-                            self.serverQueue.put(self.connectPointList[j][0] + ":" + self.connectPointList[j][1] + ":" + self.connectPointList[j][3] + ":P")
-                            j += 1
+                    for point in self.connectPointList:
+                        if i < arguments:
+                            self.serverQueue.put(point[i][0] + ":" + point[i][1] + ":" + point[i][3] + ":P")
+                            i += 1
                         else:
                             break
                     lock3.release()
@@ -116,17 +127,16 @@ class clientReadThread(threading.Thread):
 
 class clientWriteThread(threading.Thread):
 
-    def __init__(self, connectPoint, connectPointList, negotiatorClientSocket, peerClientSocket):
+    def __init__(self, connectPoint, connectPointList, negotiatorClientSocket, serverQueue):
         threading.Thread.__init__(self)
         self.connectPoint = connectPoint
         self.connectPointList = connectPointList
         self.negotiatorClientSocket = negotiatorClientSocket
-        self.peerClientSocket = peerClientSocket
+        self.serverQueue = serverQueue
 
     def run(self):
 
         while True:
-            lock4.acquire()
             if not self.connectPoint:
 
                 peerServerSocketHost = self.connectPoint[1]
@@ -139,14 +149,11 @@ class clientWriteThread(threading.Thread):
                     lock3.acquire()
                     self.connectPointList.append(self.connectPoint)
                     lock3.release()
-                    lock4.release()
-                except:
-                    lock4.release()
-                    lock3.acquire()
-                    self.connectPointList.remove(self.connectPoint)
-                    lock3.release()
-                    self.peerClientSocket.send("REGER\n")
 
+                except:
+                    lock1.acquire()
+                    self.serverQueue.put("REGER\n")
+                    lock1.release()
 
 
 
@@ -172,8 +179,8 @@ while True:
     lock1 = threading.Lock()
 
     connectPoint = []
-    # connectPoint korumak icin
-    lock4 = threading.Lock()
+    # serverQueue korumak icin
+    lock2 = threading.Lock()
 
     negotiatorClientSocket = socket.socket()
     peerClientSocket, peerClientAddr = negotiatorServerSocket.accept()
@@ -187,7 +194,7 @@ while True:
     crThread = clientReadThread()
 
     lock3.acquire()
-    cwThread = clientWriteThread(connectPoint, connectPointList, negotiatorClientSocket, peerClientSocket)
+    cwThread = clientWriteThread(connectPoint, connectPointList, negotiatorClientSocket, serverQueue)
     lock3.acquire()
 
     threads.append(srThread)
