@@ -2,16 +2,18 @@ import socket
 import threading
 import Queue
 import time
+import ip
+import inspect
 
 class serverReadThread(threading.Thread):
 
-    def __init__(self, anotherPeerClientSocket, serverQueue, connectPoint, connectPointList):
+    def __init__(self, anotherPeerClientSocket, serverQueue, connectPoint, connectPointList, fonctionList):
         threading.Thread.__init__(self)
         self.anotherPeerClientSocket = anotherPeerClientSocket
         self.serverQueue = serverQueue
         self.connectPoint = connectPoint
         self.connectPointList = connectPointList
-
+        self.fonctionList = fonctionList
 
     def parser(self, data):
 
@@ -89,6 +91,84 @@ class serverReadThread(threading.Thread):
                 self.serverQueue.put("NLIST END\n")
                 lock1.release()
 
+        elif command == "FUNRQ":
+            if self.connectPoint[2] != "S":
+                lock1.acquire()
+                self.serverQueue.put("REGER\n")
+                lock1.release()
+            else:
+                noFunction = True
+                for i in fonctionList:
+                    if arguments in fonctionList[i][0]:
+                        if fonctionList[i][1] == None:
+                            self.serverQueue.put("FUNYS " + arguments)
+                            noFunction = False
+                            break
+                        else:
+                            self.serverQueue.put("FUNYS " + arguments + ":" + arguments[i][1])
+                            noFunction = False
+                            break
+
+                if noFunction:
+                    self.serverQueue.put("FUNNO " + arguments)
+
+
+        elif command == "EXERQ":
+
+            if self.connectPoint[2] != "S":
+                lock1.acquire()
+                self.serverQueue.put("REGER\n")
+                lock1.release()
+            else:
+                indexRouter = arguments.index(":")
+                fonctionName = arguments[:indexRouter]
+                arguments = data[indexRouter+1:]
+
+                indexRouter = arguments.index(":")
+                parameters = arguments[:indexRouter]
+                arguments = data[indexRouter+1:]
+
+                indexRouter = arguments.index(":")
+                num = arguments[:indexRouter]
+                arguments = data[indexRouter+1:]
+
+                indexRouter = arguments.index(":")
+                md5sum = arguments[:indexRouter]
+                arguments = data[indexRouter+1:]
+
+                indexRouter = arguments.index(":")
+                udata = arguments[:indexRouter]
+
+
+                noFunction = True
+                for i in fonctionList:
+                    if arguments in fonctionList[i][0]:
+                        self.serverQueue.put("EXEOK " + md5sum + ":" + num)
+
+                if noFunction:
+                    self.serverQueue.put("EXENF " + md5sum + ":" + num)
+
+        elif command == "PATCH":
+
+            if self.connectPoint[2] != "S":
+                lock1.acquire()
+                self.serverQueue.put("REGER\n")
+                lock1.release()
+            else:
+                indexRouter = arguments.index(":")
+                md5sum = arguments[:indexRouter]
+                arguments = data[indexRouter+1:]
+
+                indexRouter = arguments.index(":")
+                num = arguments[:indexRouter]
+                arguments = data[indexRouter+1:]
+
+                indexRouter = arguments.index(":")
+                pdata = arguments[:indexRouter]
+
+
+
+
     def run(self):
         while True:
             data = self.anotherPeerClientSocket.recv()
@@ -153,6 +233,10 @@ class clientWriteThread(threading.Thread):
                 lock1.release()
 
 
+fonctionList = [    ("GrayScale", None), \
+                    ("Binarize", {"name":"treshold", "min":0, "max":255}), \
+                    ("SobelFilter", {"name":"treshold", "min":0, "max":255})    ]
+
 
 connectPointList = []
 # connectPointList korumak icin
@@ -182,7 +266,7 @@ while True:
     anotherPeerClientSocket, anotherPeerClientAddr = peerServerSocket.accept()
 
     lock3.acquire()
-    srThread = serverReadThread(anotherPeerClientSocket, serverQueue, connectPoint, connectPointList)
+    srThread = serverReadThread(anotherPeerClientSocket, serverQueue, connectPoint, connectPointList, fonctionList)
     lock3.release()
 
     swThread = serverWriteThread(anotherPeerClientSocket, serverQueue)
