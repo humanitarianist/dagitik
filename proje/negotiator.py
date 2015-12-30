@@ -135,21 +135,31 @@ class clientWriteThread(threading.Thread):
         self.serverQueue = serverQueue
 
     def run(self):
-        if not self.connectPoint:
-            peerServerSocketHost = self.connectPoint[1]
-            peerServerSocketPort = self.connectPoint[0]
+        registered = False
+        while True:
+            time.sleep(1000)
+            if not self.connectPoint:
 
-            try:
-                self.negotiatorClientSocket.connect(peerServerSocketHost, peerServerSocketPort)
-                self.connectPoint[2] = "S"
-                self.connectPoint[3] = time.time()
-                lock3.acquire()
-                self.connectPointList.append(self.connectPoint)
-                lock3.release()
-            except:
-                lock1.acquire()
-                self.serverQueue.put("REGER\n")
-                lock1.release()
+                peerServerSocketHost = self.connectPoint[1]
+                peerServerSocketPort = self.connectPoint[0]
+
+                try:
+                    self.negotiatorClientSocket.connect(peerServerSocketHost, peerServerSocketPort)
+                    self.connectPoint[2] = "S"
+                    self.connectPoint[3] = time.time()
+                    lock3.acquire()
+                    self.connectPointList.append(self.connectPoint)
+                    registered = True
+                    lock3.release()
+                except:
+                    lock1.acquire()
+                    self.serverQueue.put("REGER\n")
+                    lock1.release()
+                    if registered == True:
+                        self.connectPointList.remove(self.connectPoint)
+
+
+
 
 
 

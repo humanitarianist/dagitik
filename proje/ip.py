@@ -99,9 +99,6 @@ class WorkerThread (threading.Thread):
                 if str(message[0][0]) == "Sobel Filter":
                     outMessage = self.filterSobel(message[0][1], message[1], 128)
 
-                if str(message[0][0]) == "Gaussian Filter":
-                    outMessage = self.gaussianFilter(message[0][1], message[1])
-
                 if str(message[0][0]) == "Binarize":
                     outMessage = self.binarize(message[0][1], message[1], 150)
 
@@ -134,7 +131,6 @@ class imGui(QMainWindow):
         self.ui.boxFunction.addItem("Gray Scale")
         self.ui.boxFunction.addItem("Sobel Filter")
         self.ui.boxFunction.addItem("Binarize")
-        self.ui.boxFunction.addItem("Gaussian Filter")
 
         # connect buttons
         self.ui.buttonLoadImage.clicked.connect(self.loadImagePressed)

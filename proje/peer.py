@@ -237,6 +237,7 @@ fonctionList = [    ("GrayScale", None), \
                     ("Binarize", {"name":"treshold", "min":0, "max":255}), \
                     ("SobelFilter", {"name":"treshold", "min":0, "max":255})    ]
 
+ip.main()
 
 connectPointList = []
 # connectPointList korumak icin
@@ -245,7 +246,7 @@ lock3 = threading.Lock()
 peerServerSocket = socket.socket()
 
 peerServerSocketHost = socket.gethostname()
-peerServerSocketPort = 9090
+peerServerSocketPort = 6060
 
 peerServerSocket.bind((peerServerSocketHost, peerServerSocketPort))
 peerServerSocket.listen(5)
